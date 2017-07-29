@@ -18,11 +18,13 @@ import { AboutPageComponent } from '../pages/about/about-page/about-page.compone
 import { LoginPageComponent } from '../pages/user/login-page/login-page.component';
 import { StudentListComponent } from '../pages/student/student-list/student-list.component';
 import { CampusListComponent } from '../pages/campus/campus-list/campus-list.component';
+import { RxjsHomeComponent } from '../pages/rxjs/rxjs-home/rxjs-home.component';
 const SPAroutes: Routes = [
   {
     path: '',
     children: []
   },
+  { path: 'rxjs', component: RxjsHomeComponent },  
   { path: 'home', component: HomePageComponent },
   { path: 'about', component: AboutPageComponent },
   { path: 'login', component: LoginPageComponent },

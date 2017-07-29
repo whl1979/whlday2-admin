@@ -1,10 +1,22 @@
 import { Injectable } from "@angular/core";
+import { Http, Response, Headers } from "@angular/http"
+
+import { Location } from '@angular/common';
+
+
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {Observable} from 'rxjs/Observable';
+// import 'rxjs/add/observable/merge';
+import 'rxjs/add/observable/zip';
+import 'rxjs/add/observable/fromPromise';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/startWith';
 
 @Injectable()
 export class StudentService{
     isLogined:boolean = false;
-    users: Array < any > = [{
-      'index': 1,
+    students: Array < any > = [{
+      'id': 1,
      'name':'chenlu',
      'sex':'M',
      'project':'chenlu28/chenlu-exam',
@@ -14,7 +26,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 2,
+     'id': 2,
      'name':'f58xxy',
      'sex':'F',
      'project':'f58xxy/ng-admin',
@@ -24,7 +36,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 19,
+     'id': 19,
      'name':'文化利',
      'sex':'M',
      'project':'whl1979/wenhuali-admin',
@@ -34,7 +46,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 3,
+     'id': 3,
      'name':'kalezhang',
      'sex':'M',
      'project':'kalezhang/ng-admin',
@@ -43,7 +55,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 4,
+     'id': 4,
      'name':'JansenGao',
      'sex':'M',
      'project':'JansenGao/angular',
@@ -52,7 +64,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 5,
+     'id': 5,
      'name':'ChengJiqiang',
      'sex':'M',
      'project':'ChengJiqiang/ChengJiQiang-ng-app',
@@ -62,7 +74,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 6,
+     'id': 6,
      'name':'Serenashan',
      'sex':'M',
      'project':'Serenashan/serena-admin',
@@ -72,7 +84,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 7,
+     'id': 7,
      'name':'gudeyi',
      'sex':'M',
      'project':'gudeyi/admin',
@@ -82,7 +94,7 @@ export class StudentService{
     }
     ,
     {
-     'index': 8,
+     'id': 8,
      'name':'willwangyue',
      'sex':'M',
      'project':'willwangyue/will-ng-admin',
@@ -92,7 +104,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 9,
+     'id': 9,
      'name':'郭兆青',
      'desc':'游戏管理系统',
      'sex':'M',
@@ -102,7 +114,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 10,
+     'id': 10,
      'name':'willwangyue',
      'sex':'M',
      'project':'willwangyue/will-ng-admin',
@@ -111,7 +123,7 @@ export class StudentService{
      'exam3': 0
     },
     {
-     'index': 11,
+     'id': 11,
      'name':'willwangyue',
      'sex':'M',
      'project':'willwangyue/will-ng-admin',
@@ -120,13 +132,129 @@ export class StudentService{
      'exam3': 0
     }
   ];
+    http:Http
+    constructor(http:Http,private location:Location){
+        this.http = http
+    }
+    delete(obj){
+        this.deleteStudentById(obj.objectId).subscribe(data=>{
+            console.log(data);
+            this.location.go("/student")
+        })
 
-    constructor(){
+        // this.students.forEach((item,index,array)=>{
+        //     if(item.id == id){
+        //         array.splice(index,1)
+        //     }
+        // })
+    }
+    search(type,value){
+        this.students.sort((a,b)=>{
+        let result1 = String(a[type]).match(value)
+        let result2 = String(b[type]).match(value)
 
+        return Number(result2)-Number(result1);
+        });
+    }
+    deleteChecked(){
+        let checkList = this.students.filter(item=>item.check==true)
+        checkList.forEach(item=>{
+            this.delete(item)
+        })
     }
 
-    getUsers(){
-        return this.users;
+    getStudents():Observable<any[]>{
+        // 1. 拼接HTTP请求所需的URL和Headers
+        let serverURL = "http://localhost:1337/parse"
+        let path = "/classes/"
+        let className = "Student"
+        let url = serverURL+path+className
+
+        let headers:Headers = new Headers({
+            "X-Parse-Application-Id":"dev",
+            "X-Parse-Master-Key":"angulardev",
+            // "X-Parse-Session-Token":"r:059bbbebdc201de090f16fe9716b43bf",
+            "Content-Type":"application/json; charset=utf-8"
+        })
+
+        // 2. 发起HTTP GET查询请求
+        return this.http.get(url,{ headers:headers })
+        .map(data=>data.json())
+        .map(data=>data.results)        
+    }
+    deleteStudentById(objectId):Observable<any>{
+            // 1. 拼接HTTP请求所需的URL和Headers
+            let serverURL = "http://localhost:1337/parse"
+            let path = "/classes/"
+            let className = "Student"
+            let url = serverURL+path+className+"/"+objectId
+
+            let headers:Headers = new Headers({
+                "X-Parse-Application-Id":"dev",
+                "X-Parse-Master-Key":"angulardev",
+                // "X-Parse-Session-Token":"r:059bbbebdc201de090f16fe9716b43bf",
+                "Content-Type":"application/json; charset=utf-8"
+            })
+
+            // 2. 发起HTTP DELETE查询请求
+            return this.http.delete(url,{ headers:headers })
+            .map(data=>data.json())
+        }
+    getStudentById(objectId):Observable<any>{
+        // 1. 拼接HTTP请求所需的URL和Headers
+        let serverURL = "http://localhost:1337/parse"
+        let path = "/classes/"
+        let className = "Student"
+        let url = serverURL+path+className+"/"+objectId
+
+        let headers:Headers = new Headers({
+            "X-Parse-Application-Id":"dev",
+            "X-Parse-Master-Key":"angulardev",
+            // "X-Parse-Session-Token":"r:059bbbebdc201de090f16fe9716b43bf",
+            "Content-Type":"application/json; charset=utf-8"
+        })
+
+        // 2. 发起HTTP GET查询请求
+        return this.http.get(url,{ headers:headers })
+        .map(data=>data.json())
+    }
+
+    saveStudent(body?):Observable<any[]>{
+        // 1. 拼接HTTP请求所需的URL和Headers
+        let serverURL = "http://localhost:1337/parse"
+        let path = "/classes/"
+        let className = "Student"
+        let url = serverURL+path+className
+
+        let headers:Headers = new Headers({
+            "X-Parse-Application-Id":"dev",
+            "X-Parse-Master-Key":"angulardev",
+            // "X-Parse-Session-Token":"r:059bbbebdc201de090f16fe9716b43bf",
+            "Content-Type":"application/json; charset=utf-8"
+        })
+
+        // 2. 发起HTTP POST或PUT提交请求
+        if(!body){
+            body = {name:"666777",project:"ryanemax/ng-admin",exam1:66}
+        }
+
+        if(body.objectId){
+            url += "/"+body.objectId
+            // body.objectId = undefined
+            return this.http.put(url,{
+                name:body.name,
+                exam1:body.exam1,
+                exam2:body.exam2,
+                exam3:body.exam3,
+                project:body.project,
+                sex:body.sex,
+            },{ headers:headers })
+            .map(data=> data.json())
+        }else{
+            return this.http.post(url,body,{ headers:headers })
+            .map(data=> data.json())
+        }
+
     }
 
 }

@@ -7,51 +7,31 @@ import {
   Title
 } from '@angular/platform-browser';
 
+import { Http } from '@angular/http'
+
 import {CampusService} from "../campus.service";
+
+import {Parse} from "../../../cloud/parse"
+
 @Component({
   selector: 'app-campus-list',
   templateUrl: './campus-list.component.html',
   styleUrls: ['./campus-list.component.scss']
 })
 export class CampusListComponent implements OnInit {
-  searchText: string = "default";
+  searchText: string = "";
+  searchType: string = "name";
   selectCampus:any={
     name:"未选择"
   };
   searchResult:Array<any>;
   campuses:Array<any>=[];
-  deleteLast() {
-    this.campuses.pop();
-  }
-  search(type="name",limit?:number){
-    this.searchResult = this.campuses.filter(item=>{
-      let result = String(item[type]).match(this.searchText)
-      if(result){
-        return true
-      }else{
-        return false
-      }
-    })
-    
-    if(limit){
-      this.searchResult.splice(0,limit)
-    }
-  }
-  getCampusClick(ev){
+
+  getUserClick(ev){
     this.selectCampus = ev
     console.log(ev);
   }
-  saveNewCampus() {
-    this.campuses.push({
-    "randomindex":1,
-    "index":99,
-    "campusId":99,
-    "name":"某中学",
-      "address":"沙河口区",
-      "avgtotal":577,
-      "rate":"30%"
-    });
-  }
+ 
   sortByAsccending(type="index") {
     // 参考MDN Array操作的API文档 Array相关方法方法
     this.campuses.sort((a,b)=>{
@@ -68,13 +48,23 @@ export class CampusListComponent implements OnInit {
   sortByRadom() {
     // 参考MDN Array操作的API文档 Math相关方法
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
-    for (let entry of this.campuses){
-      entry.randomindex = Math.random()* this.campuses.length;
-    }
-    this.sortByAsccending("randomindex")
+  this.campuses.forEach((campus,index)=>{
+    campus.randomindex = Math.random();
+  })
+    this.sortByAsccending("randomindex");
   }
-  constructor(meta: Meta, title: Title, private campusServ:CampusService) {
-    this.campuses = this.campusServ.getCampuses()
+  constructor(meta: Meta, title: Title,private http:Http, private campusServ:CampusService) {
+
+    let query = new Parse.Query("Campus",http)
+    query.find().subscribe(data=>{
+      console.log(data)
+      this.campuses = data
+    })
+
+    // this.campusServ.getCampuses().subscribe(data=>{
+    //   console.log(data)
+    // })
+    
  
     // Set SEO
     title.setTitle('My Home Page');
@@ -93,20 +83,6 @@ export class CampusListComponent implements OnInit {
       },
     ]);
     // end of SEO
-  }
-
-  testTempCampuses(){
-    console.log(this.campuses.length);
-    let tempCampuses:Array<any> = []
-    this.campuses.forEach(item=>{
-      tempCampuses.push(item)
-    })
-    tempCampuses.pop()
-    tempCampuses.pop()
-    tempCampuses.pop()
-    tempCampuses.pop()
-    tempCampuses.pop()
-    console.log(tempCampuses.length);
   }
 
   ngOnInit() {}

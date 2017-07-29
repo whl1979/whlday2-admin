@@ -26,40 +26,38 @@ export class CampusEditComponent implements OnInit,OnDestroy {
     this.location.back();
   }
   save(){
-    this.campusServ.campuses.push(this.campus)
-    this.location.back();
+    this.campus.avgtotal = Number(this.campus.avgtotal)
+    this.campus.randomindex = Number(this.campus.randomindex)
+    this.campus.index = Number(this.campus.index)
+    this.campus.campusId = Number(this.campus.campusId)
+    this.campusServ.saveCampus(this.campus).subscribe(data=>{
+      console.log(data)
+      this.location.back();
+    })
+    this.campusServ.saveCampus(this.campus).subscribe(data=>{
+      console.log(data)
+      this.location.back();        
+    })
   }
   ngOnInit() {
-    this.getCampusSubscribe = this.route.params.subscribe(params=>{
-      this.getCampus(params['sid']).then(campus=>{
-      console.log(campus)
-      this.campusId = campus.id;
-      this.campus = campus
-    }).catch(err=>{
-      console.log(err)
-    })
+        this.route.params.subscribe(params=>{
+          let id = params['id']
+          if(id=="new"){
+            let campus = {name:""}
+            this.isNew = true;
+            this.campus = campus
+          }else{
+            this.campusServ.getCampusById(id).subscribe(campus=>{
+            console.log(campus)
+            // this.campusId = campus.objectId;
+            this.campus = campus
+        })
+      }
+
     })
   }
   ngOnDestroy(){
-    this.getCampusSubscribe.unsubscribe();
   }
 
-  getCampus(id: any): Promise<any> {
-    
-    let p = new Promise((resolve,reject)=>{
-      if(id=="new"){
-        let campus = {name:""}
-        this.isNew = true;
-        resolve(campus)
-      }
-      let campus = this.campusServ.campuses.find(item=>item.id == id)
-      if(campus){
-        resolve(campus)
-      }else{
-        reject("campus not found")
-      }
-    })
-    return p
-}
 
 }

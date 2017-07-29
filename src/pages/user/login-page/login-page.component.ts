@@ -3,7 +3,6 @@ import { Meta, Title } from '@angular/platform-browser';
 
 import { StudentService } from '../../student/student.service'
 
-
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
@@ -24,9 +23,9 @@ export class LoginPageComponent implements OnInit {
     this.isLogined = true;
   };
   isLogined:boolean = false;
-  constructor(meta: Meta, title: Title, private userServ:StudentService) {
-    this.isLogined = this.userServ.isLogined;
-    
+  constructor(meta: Meta, title: Title, private studentServ:StudentService) {
+    this.isLogined = this.studentServ.isLogined;
+
     title.setTitle('Login Page');
 
     meta.addTags([ 
